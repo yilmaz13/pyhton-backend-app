@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Quiz Results</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Your Quiz Results</h1>
+        <p>You scored {{ score }} out of {{ total_questions * 5 }}.</p>
+        <p>Highest Score: {{ highest_score }}</p>
+        <h2>Answers:</h2>
+        <ul>
+            {% for question, user_answer, correct_answer in results %}
+                <li>
+                    <strong>{{ question }}</strong><br>
+                    Your answer: <span class="{{ 'correct' if user_answer == correct_answer else 'incorrect' }}">{{ user_answer }}</span><br>
+                    Correct answer: {{ correct_answer }}
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('quiz') }}">Try Again</a>
+        <footer>
+            <p><a href="https://github.com/yilmaz13">GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
