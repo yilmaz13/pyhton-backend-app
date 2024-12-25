@@ -14,3 +14,9 @@ class Option(database.Model):
     question_id = database.Column(database.Integer, database.ForeignKey('questions.id'), nullable=False)
     option_text = database.Column(database.String(255), nullable=False)
     is_correct = database.Column(database.Boolean, default=False)
+
+class UserScore(database.Model):
+    __tablename__ = 'user_scores'
+
+    id = database.Column(database.Integer, primary_key=True)
+    highest_score = database.Column(database.Integer, default=0)

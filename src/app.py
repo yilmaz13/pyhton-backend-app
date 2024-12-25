@@ -1,7 +1,7 @@
 from flask import Flask,  render_template, session, request, current_app
 from config import Config
-from database.db import init_db
-from models.quiz import Question, Option
+from database.db import init_db, database
+from models.quiz import Question, Option, UserScore
 from populate_db import populate_db
 
 app = Flask(__name__)
@@ -12,7 +12,15 @@ init_db(app)
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/quiz', methods=['GET', 'POST'])
 def quiz():
-    highest_score = session.get('highest_score', 0)
+   
+    user_score = UserScore.query.first()
+
+    if not user_score:
+        user_score = UserScore()
+        database.session.add(user_score)
+        database.session.commit()
+
+    highest_score = user_score.highest_score
 
     if request.method == 'POST':
         # 
@@ -35,14 +43,21 @@ def quiz():
         if score > highest_score:
             session['highest_score'] = score
 
-        return render_template('results.html', score=score,  highest_score=highest_score, total_questions=total_questions, results=results)
+        return render_template('results.html', score=score,  highest_score=user_score.highest_score, total_questions=total_questions, results=results)
 
     questions = Question.query.all()
-    return render_template('quiz.html', questions=questions, highest_score=highest_score)
+    return render_template('quiz.html', questions=questions, highest_score=user_score.highest_score)
 
 @app.route('/submit_quiz', methods=['POST'])
 def submit_quiz():
-    highest_score = session.get('highest_score', 0)
+
+    user_score = UserScore.query.first()
+    if not user_score:
+        user_score = UserScore()
+        database.session.add(user_score)
+        database.session.commit()
+
+    highest_score = user_score.highest_score
     
     answers = request.form.to_dict()
     score = 0
@@ -61,9 +76,10 @@ def submit_quiz():
     total_questions = len(results)
 
     if score > highest_score:
-        session['highest_score'] = score
+        user_score.highest_score = score
+        database.session.commit()
 
-    return render_template('results.html', highest_score=highest_score, score=score, total_questions=total_questions, results=results)
+    return render_template('results.html', highest_score=user_score.highest_score, score=score, total_questions=total_questions, results=results)
 
 @app.route('/results', methods=['GET'])
 def results():
